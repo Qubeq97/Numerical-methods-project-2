@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Matrix.h"
 #include "Vector.h"
-#include "proj2.h"
+
 
 
 
@@ -29,21 +29,21 @@ Matrix ourMatrix(unsigned int N, int e)
 	return result;
 }
 
-Vector ourVector(unsigned int N, int f)
+Matrix ourVector(unsigned int N, int f)
 {
-	Vector result(N);
+	Matrix result(N,1);
 	for (unsigned int i = 0; i < N; i++)
-		result[i] = sin(i*(f + 1));
+		result[i][i] = sin(i*(f + 1));
 	return result;
 }
 
 
-double norm(Vector vector)
+double norm(Matrix vector)
 {
 	double sum = 0;
-	for (unsigned int i = 0; i < vector.getLength(); i++)
+	for (unsigned int i = 0; i < vector.getRows(); i++)
 	{
-		sum += vector[i] * vector[i];
+		sum += vector[i][0] * vector[i][0];
 	}
 	return sqrt(sum);
 }
@@ -72,23 +72,42 @@ Vector LUFactor(const Matrix& A, const Vector& b)
 
 
 // Solves a system of linear equations Ax = b for x using the Jacobi method.
-Vector Jacobi(const Matrix& A, const Vector& b)
+Matrix Jacobi(Matrix A, Matrix b)
 {
+	assert(A.getRows() == A.getCols() && A.getRows() == b.getRows());
 	// Dividing the A matrix: A = L + U + D
+	Matrix L = A;
+	Matrix U = A;
+	unsigned int rows = A.getRows(), cols = A.getCols();
+	for (unsigned int i = 0; i < rows; i++)
+	{
+		for (unsigned int j = 0; j <= i; j++)
+		{
+			L[i][j] = 0;
+			U[rows - i - 1][cols - j - 1] = 0;
+		}
+	}
+	Matrix D = A.diagonal();
+	Matrix x = b;
+	
+	do
+	{
 
+	} while (norm(A*x - b) > pow(10, -9));
+
+	return Matrix();
 }
 
 
 int main()
 {
 	Matrix A = ourMatrix(961, 7);
-	Vector b = ourVector(961, 5);
-	Matrix T = (A+b).transposed();
+	Matrix b = ourVector(961, 5);
 
 	Matrix C = A*b;
 
 
-	LUFactor(A, b);
+	Jacobi(A, b);
 
 	return 0;
 }

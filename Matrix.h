@@ -21,6 +21,7 @@ public:
 	Matrix operator-(const Matrix& m);
 	Matrix operator*(const Matrix& m);
 	bool operator == (const Matrix& m);
+	Matrix diagonal();
 	Matrix transposed();
 	Matrix ones(unsigned int rows, unsigned int cols);
 	double* operator[] (unsigned int row);
@@ -28,7 +29,7 @@ public:
 	unsigned int getCols() const;
 };
 
-Matrix diagonal(Matrix & m);
+
 
 
 

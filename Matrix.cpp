@@ -158,11 +158,11 @@ unsigned int Matrix::getCols() const
 
 
 
-Matrix diagonal(Matrix & m)
+Matrix Matrix::diagonal()
 {
-	assert(m.getCols() == m.getRows());
-	Matrix result = Matrix(m.getCols(), m.getRows());
-	for (unsigned int i = 0; i < m.getRows(); i++)
-		result[i][i] = m[i][i];
+	assert(cols == rows);
+	Matrix result = Matrix(cols, rows);
+	for (unsigned int i = 0; i < rows; i++)
+		result.arr[i][i] = arr[i][i];
 	return result;
 }
