@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Matrix.h"
 #include "Vector.h"
+#include "proj2.h"
 
 
 
@@ -47,6 +48,8 @@ double norm(Vector vector)
 	return sqrt(sum);
 }
 
+// A must be equal to L * U.
+// Not working yet. :(
 Vector LUFactor(const Matrix& A, const Vector& b)
 {
 	unsigned int m = A.getRows();
@@ -58,28 +61,29 @@ Vector LUFactor(const Matrix& A, const Vector& b)
 		for (unsigned int j = k + 1; k < m; k++)
 		{
 			L[j][k] = U[j][k] / U[k][k];
-			for (unsigned int l = k; k < m; k++)
+			for (unsigned int l = k-1; k < m; k++)
 				U[j][l] -= L[j][j] * U[k][l];
 		}
-	for (unsigned int i = 0; i < m; i++)
-	{
-		for (unsigned int j = 0; j < m; j++)
-		{
-			if (L[i][j] != 0 || U[i][j] != 0)
-			{
-				std::cout << "NONZERO!" << std::endl;
-				return Vector(12);
-			}
-		}
-	}
+	if (L * U == A)
+		std::cout << "YES!\n";
 	return Vector(12);
 }
+
+
+
+// Solves a system of linear equations Ax = b for x using the Jacobi method.
+Vector Jacobi(const Matrix& A, const Vector& b)
+{
+	// Dividing the A matrix: A = L + U + D
+
+}
+
 
 int main()
 {
 	Matrix A = ourMatrix(961, 7);
 	Vector b = ourVector(961, 5);
-
+	Matrix T = (A+b).transposed();
 
 	Matrix C = A*b;
 
