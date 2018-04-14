@@ -28,29 +28,32 @@ Matrix::~Matrix()
 			free(arr[i]);
 		free(arr);
 	}
+	arr = nullptr;
 }
 
 Matrix::Matrix(const Matrix& m)
 {
 	rows = m.rows;
 	cols = m.cols;
-	arr = new double*[rows];
+	arr = (double**)calloc(rows, sizeof(double*));
 	for (unsigned int i = 0; i < rows; i++)
 	{
-		arr[i] = new double[cols];
+		arr[i] = (double*)calloc(cols, sizeof(double));
 		for (unsigned int j = 0; j < cols; j++)
 			arr[i][j] = m.arr[i][j];
 	}
 }
 
+
+
 Matrix Matrix:: operator=(const Matrix& m)
 {
 	rows = m.rows;
 	cols = m.cols;
-	arr = new double*[rows];
+	arr = (double**)calloc(rows, sizeof(double*));
 	for (unsigned int i = 0; i < rows; i++)
 	{
-		arr[i] = new double[cols];
+		arr[i] = (double*)calloc(cols, sizeof(double));
 		for (unsigned int j = 0; j < cols; j++)
 			arr[i][j] = m.arr[i][j];
 	}

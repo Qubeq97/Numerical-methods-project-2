@@ -2,10 +2,8 @@
 #include "Matrix.h"
 #include "Vector.h"
 
-
-
-
-Matrix ourMatrix(unsigned int N, int e)
+// Function making a matrix complaint with preoject requirements.
+Matrix ourMatrix(unsigned int N, unsigned int e)
 {
 	Matrix result(N, N);
 	double a1 = 5 + e;
@@ -29,53 +27,103 @@ Matrix ourMatrix(unsigned int N, int e)
 	return result;
 }
 
-Matrix ourVector(unsigned int N, int f)
+// A vector compliant to project requirements.
+Vector ourVector(unsigned int N, unsigned int f)
 {
-	Matrix result(N,1);
+	Vector result(N);
 	for (unsigned int i = 0; i < N; i++)
-		result[i][i] = sin(i*(f + 1));
+		result[i] = sin(i*(f + 1));
 	return result;
 }
 
 
-double norm(Matrix vector)
+double norm(Vector vector)
 {
 	double sum = 0;
-	for (unsigned int i = 0; i < vector.getRows(); i++)
+	for (unsigned int i = 0; i < vector.getLength(); i++)
 	{
-		sum += vector[i][0] * vector[i][0];
+		sum += vector[i] * vector[i];
 	}
 	return sqrt(sum);
 }
 
-// A must be equal to L * U.
-// Not working yet. :(
-Vector LUFactor(const Matrix& A, const Vector& b)
+
+Vector forwardSubst(Matrix L, Vector b)
 {
+	Vector result(b.getRows());
+	unsigned int length = b.getLength();
+	for (unsigned int i = 0; i < length; i++)
+	{
+		result[i] = b[i];
+		for (unsigned int j = 0; j < i; j++)
+		{
+			result[i] -= L[i][j] * result[j];
+		}
+		result[i] /= L[i][i];
+	}
+	return result;
+}
+
+Vector backwardSubst(Matrix U, Vector b)
+{
+	Vector result(b.getRows());
+	unsigned int length = b.getLength();
+	unsigned int cols = U.getCols();
+	for (unsigned int i = 0; i < length; i++)
+	{
+		result[i] = b[i];
+		for (unsigned int j = i+1; j < length; j++)
+		{
+			result[i] -= U[i][j] * result[j];
+		}
+		result[i] /= U[i][i];
+	}
+	return result;
+}
+
+
+Matrix LUFactor(Matrix A, Matrix b)
+{
+	assert(A.getRows() == A.getCols() && A.getRows() == b.getRows());
 	unsigned int m = A.getRows();
-	Matrix L(m,m);
+	Matrix L(m, m);
 	for (unsigned int i = 0; i < m; i++)
 		L[i][i] = 1;
 	Matrix U = A;
-	for (unsigned int k=0; k<m-1; k++)
+	for (unsigned int k = 0; k < m - 1; k++)
 		for (unsigned int j = k + 1; k < m; k++)
 		{
 			L[j][k] = U[j][k] / U[k][k];
-			for (unsigned int l = k-1; k < m; k++)
-				U[j][l] -= L[j][j] * U[k][l];
+			for (unsigned int l = k; k < m; k++)
+				U[j][l] -= (L[j][k] * U[k][l]);
 		}
-	if (L * U == A)
-		std::cout << "YES!\n";
-	return Vector(12);
+
+	Matrix test = L*U;
+	// For debugging purposes only! (Almost OK, maybe just a precision loss...)
+	for (unsigned int i = 0; i < m; i++)
+	{
+		for (unsigned int j = 0; j < m; j++)
+		{
+			if (test[i][j] != A[i][j])
+			{
+				std::cout << i << ' ' << j << std::endl;
+				std::cout << test[i][j] << ' ' << A[i][j] << std::endl;
+			}
+		}
+	}
+
+	Vector y = forwardSubst(L, b);
+	std::cout << norm(L*y - b) << std::endl;
+	Vector x = backwardSubst(U, y);
+	std::cout << norm(U*x - y) << std::endl;
+	return x;
 }
 
 
 
-// Solves a system of linear equations Ax = b for x using the Jacobi method.
 Matrix Jacobi(Matrix A, Matrix b)
 {
 	assert(A.getRows() == A.getCols() && A.getRows() == b.getRows());
-	// Dividing the A matrix: A = L + U + D
 	Matrix L = A;
 	Matrix U = A;
 	unsigned int rows = A.getRows(), cols = A.getCols();
@@ -88,13 +136,14 @@ Matrix Jacobi(Matrix A, Matrix b)
 		}
 	}
 	Matrix D = A.diagonal();
-	Matrix x = b;
-	
+	Vector x = b;
+
 	do
 	{
-
+		// Implement whatever may be needed! 
 	} while (norm(A*x - b) > pow(10, -9));
 
+	// TO BE IMPLEMENTED!
 	return Matrix();
 }
 
@@ -102,13 +151,13 @@ Matrix Jacobi(Matrix A, Matrix b)
 int main()
 {
 	Matrix A = ourMatrix(961, 7);
-	Matrix b = ourVector(961, 5);
-
-	Matrix C = A*b;
+	Vector b = ourVector(961, 5);
 
 
-	Jacobi(A, b);
+	Vector x = LUFactor(A, b);
 
+
+	system("pause");
 	return 0;
 }
 
