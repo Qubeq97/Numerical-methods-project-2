@@ -7,8 +7,10 @@ class Vector :
 	public Matrix
 {
 public:
-	Vector(unsigned int elements);
-	double& operator[] (unsigned int element);
+	Vector(unsigned int);
+	double& operator[] (unsigned int);
+	double& operator()(unsigned int);
+	double operator() (unsigned int) const;
 	unsigned int getLength() const;
 	Vector(const Matrix&);
 };

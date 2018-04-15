@@ -68,7 +68,7 @@ Matrix Matrix:: operator=(Matrix&& m)
 	return *this;
 }
 
-Matrix Matrix:: operator+(const Matrix& m)
+Matrix Matrix:: operator+(const Matrix& m) const
 {
 	Matrix result(*this);
 	for (unsigned int i = 0; i < rows; i++)
@@ -79,7 +79,7 @@ Matrix Matrix:: operator+(const Matrix& m)
 	return result;
 }
 
-Matrix Matrix:: operator-(const Matrix& m)
+Matrix Matrix:: operator-(const Matrix& m) const
 {
 	Matrix result(*this);
 	for (unsigned int i = 0; i < rows; i++)
@@ -90,7 +90,7 @@ Matrix Matrix:: operator-(const Matrix& m)
 	return result;
 }
 
-Matrix Matrix::operator*(const Matrix& m)
+Matrix Matrix::operator*(const Matrix& m) const
 {
 	Matrix result(this->rows, m.cols);
 	for (unsigned int i = 0; i < this->rows; i++)
@@ -108,7 +108,16 @@ Matrix Matrix::operator*(const Matrix& m)
 	return result;
 }
 
-bool Matrix:: operator == (const Matrix& m)
+Matrix Matrix::operator-() const
+{
+	Matrix result(*this);
+	for (unsigned int i = 0; i < rows; i++)
+		for (unsigned int j = 0; j < cols; j++)
+			result.arr[i][j] *= (-1);
+	return result;
+}
+
+bool Matrix::operator == (const Matrix& m) const
 {
 	if (arr == nullptr || m.arr == nullptr)
 		return false;
@@ -142,12 +151,26 @@ Matrix Matrix::ones(unsigned int rows, unsigned int cols)
 	return result;
 }
 
+double& Matrix::operator()(unsigned int row, unsigned int col)
+{
+	assert(row < rows && col < cols);
+	return arr[row][col];
+}
+
+double Matrix::operator()(unsigned int row, unsigned int col) const
+{
+	assert(row < rows && col < cols);
+	return arr[row][col];
+}
+
 
 
 double* Matrix::operator[] (unsigned int row)
 {
 	return arr[row];
 }
+
+
 
 
 unsigned int Matrix::getRows() const
@@ -160,8 +183,7 @@ unsigned int Matrix::getCols() const
 }
 
 
-
-Matrix Matrix::diagonal()
+Matrix Matrix::diagonal() const
 {
 	assert(cols == rows);
 	Matrix result = Matrix(cols, rows);

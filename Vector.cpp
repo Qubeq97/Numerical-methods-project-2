@@ -8,6 +8,19 @@ Vector::Vector(unsigned int elements)
 
 double& Vector::operator[] (unsigned int element)
 {
+	assert(element < rows);
+	return arr[element][0];
+}
+
+double& Vector::operator()(unsigned int element)
+{
+	assert(element < rows);
+	return arr[element][0];
+}
+
+double Vector::operator()(unsigned int element) const
+{
+	assert(element < rows);
 	return arr[element][0];
 }
 
