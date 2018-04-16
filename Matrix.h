@@ -6,13 +6,13 @@
 class Matrix
 {
 protected:
-	unsigned int rows, cols;
+	int rows, cols;
 	double** arr;
 
 public:
 
 	Matrix();
-	Matrix(unsigned int rows, unsigned int cols);
+	Matrix(int rows, int cols);
 	~Matrix();
 	Matrix(const Matrix& m);
 	Matrix operator=(const Matrix& m);
@@ -24,12 +24,12 @@ public:
 	bool operator == (const Matrix& m) const;
 	Matrix diagonal() const;
 	Matrix transposed();
-	Matrix ones(unsigned int rows, unsigned int cols);
-	double& operator() (unsigned int, unsigned int);
-	double operator() (unsigned int, unsigned int) const;
-	double* operator[] (unsigned int row);
-	unsigned int getRows() const;
-	unsigned int getCols() const;
+	Matrix ones(int rows, int cols);
+	double& operator() (int, int);
+	double operator() (int, int) const;
+	double* operator[] (int row);
+	int getRows() const;
+	int getCols() const;
 };
 
 

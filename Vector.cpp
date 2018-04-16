@@ -1,30 +1,30 @@
 #include "Vector.h"
 
 
-Vector::Vector(unsigned int elements)
+Vector::Vector(int elements)
 {
 	this->Matrix::Matrix(elements, 1);
 }
 
-double& Vector::operator[] (unsigned int element)
+double& Vector::operator[] (int element)
 {
 	assert(element < rows);
 	return arr[element][0];
 }
 
-double& Vector::operator()(unsigned int element)
+double& Vector::operator()(int element)
 {
 	assert(element < rows);
 	return arr[element][0];
 }
 
-double Vector::operator()(unsigned int element) const
+double Vector::operator()(int element) const
 {
 	assert(element < rows);
 	return arr[element][0];
 }
 
-unsigned int Vector::getLength() const
+int Vector::getLength() const
 {
 	return rows;
 }
