@@ -1,9 +1,12 @@
 #include <iostream>
+#include <ctime>
 #include "Matrix.h"
 #include "Vector.h"
 
+#define A1 (5+7)
+#define F 5
 
-// Function making a matrix complaint with preoject requirements.
+// Function making a matrix complaint with project requirements.
 Matrix ourMatrix(int N, double a1)
 {
 	Matrix result(N, N);
@@ -82,7 +85,7 @@ Vector backwardSubst(const Matrix& U, const Vector& b)
 }
 
 
-Matrix LUFactor(const Matrix& A, const Matrix& b)
+Vector LUFactor(const Matrix& A, const Matrix& b)
 {
 	assert(A.getRows() == A.getCols() && A.getRows() == b.getRows());
 	int m = A.getRows();
@@ -91,26 +94,13 @@ Matrix LUFactor(const Matrix& A, const Matrix& b)
 		L(i, i) = 1;
 	Matrix U = A;
 	for (int k = 0; k < m - 1; k++)
-		for (int j = k + 1; k < m; k++)
+		for (int j = k + 1; j < m; j++)
 		{
 			L(j, k) = U(j, k) / U(k, k);
-			for (int l = k; k < m - 1; k++)
-				U(j, l) -= (L(j, k) * U(j, l));
+			for (int l = k; l < m; l++)
+				U(j, l) -= (L(j, k) * U(k, l));
 		}
 
-	Matrix test = L * U;
-	// For debugging purposes. (Almost OK, maybe just a precision loss...)
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < m; j++)
-		{
-			if (test(i, j) != A(i, j))
-			{
-				std::cout << "LU ERROR: " << i << ' ' << j << std::endl;
-				std::cout << test(i, j) << ' ' << A(i, j) << std::endl;
-			}
-		}
-	}
 
 	Vector y = forwardSubst(L, b);
 	Vector x = backwardSubst(U, y);
@@ -120,36 +110,21 @@ Matrix LUFactor(const Matrix& A, const Matrix& b)
 int Jacobi(const Matrix& A, const Vector& b)
 {
 	assert(A.getRows() == A.getCols() && A.getRows() == b.getRows());
-	Matrix L = A;
-	Matrix U = A;
-	int rows = A.getRows(), cols = A.getCols();
-	for (int i = 0; i < rows; i++)
-	{
-		for (int j = 0; j <= i; j++)
-		{
-			L(i, j) = 0;
-			U(rows - i - 1, cols - j - 1) = 0;
-		}
-	}
+
 	Matrix D = A.diagonal();
+	Matrix sumLU = A - D;
 
 	Vector x(b.getLength());
 	for (int i = 0; i < x.getLength(); i++)
 		x(i) = 1;
 
-	L = -L;
-	U = -U;
-
-
-	Matrix sumLU = L + U;
 
 	double resnorm;
 	int iters = 0;
 	do
 	{
-		x = forwardSubst(D, sumLU*x) + forwardSubst(D, b);
+		x = forwardSubst(-D, sumLU*x) + forwardSubst(D, b);
 		resnorm = norm(A*x - b);
-		std::cout << resnorm << std::endl;
 		iters++;
 	} while (resnorm > pow(10, -9));
 
@@ -159,36 +134,29 @@ int Jacobi(const Matrix& A, const Vector& b)
 
 int GaussSeidel(const Matrix& A, const Vector& b)
 {
-	Matrix L = A;
 	Matrix U = A;
 	int rows = A.getRows(), cols = A.getCols();
 	for (int i = 0; i < rows; i++)
 	{
 		for (int j = 0; j <= i; j++)
 		{
-			L(i, j) = 0;
 			U(rows - i - 1, cols - j - 1) = 0;
 		}
 	}
-	Matrix D = A.diagonal();
+
+	Matrix sumDL = A - U;
 
 	Vector x(b.getLength());
 	for (int i = 0; i < x.getLength(); i++)
 		x(i) = 1;
 
-	L = -L;
-	U = -U;
-
-
-	Matrix diffDL = D - L;
 
 	int iters = 0;
 	double resnorm;
 	do
 	{
-		x = backwardSubst(diffDL, U*x) + backwardSubst(diffDL, b);
+		x = backwardSubst(-sumDL, U*x) + backwardSubst(sumDL, b);
 		resnorm = norm(A*x - b);
-		std::cout << resnorm << std::endl;
 		iters++;
 	} while (resnorm > pow(10, -9));
 
@@ -198,15 +166,26 @@ int GaussSeidel(const Matrix& A, const Vector& b)
 
 int main()
 {
-	Matrix A = ourMatrix(961, 5 + 7);
-	Vector b = ourVector(961, 5);
+	Matrix A = ourMatrix(961, A1);
+	Vector b = ourVector(961, F);
+
+	clock_t start;
+
+	std::cout << "Test for 961 elements" << std::endl;
+
+	start = clock();
+	int itersJ = Jacobi(A, b);
+	double timeJacobi = double(clock() - start) / CLOCKS_PER_SEC;
+	std::cout << "Jacobi time: " << timeJacobi << ", iterations: " << itersJ << std::endl;
+
+	start = clock();
+	int itersGS = GaussSeidel(A, b);
+	double timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
+	std::cout << "Gauss-Seidel time: " << timeSeidel << ", iterations: " << itersGS << std::endl;
 
 
-	int itersa = Jacobi(A, b);
-	int itersb = GaussSeidel(A, b);
-
-	std::cout << "Jacobi iters: " << itersa << std::endl;
-	std::cout << "Gauss-Seidel iters: " << itersb << std::endl;
+	Vector luResult = LUFactor(A, b);
+	std::cout << "Norm of LU result residuum: " << norm(A*luResult - b) << std::endl;
 
 	/*A = ourMatrix(961, 3);
 	itersa = Jacobi(A, b);
@@ -214,7 +193,30 @@ int main()
 	std::cout << "Jacobi iters: " << itersa << std::endl;
 	std::cout << "Gauss-Seidel iters: " << itersb << std::endl;*/
 
-	//In this case, iterative methods DO NOT converge.
+	// In that case, iterative methods DO NOT converge and would iterate infinitely
+	// Commented because it would get the program stuck.
+
+
+	int tab[] = { 100,500,1000,2000,3000,6000 };
+
+	for (int N : tab)
+	{
+		std::cout << "Test for " << N << " elements" << std::endl;
+		A = ourMatrix(N, A1);
+		b = ourVector(N, F);
+
+
+		start = clock();
+		itersJ = Jacobi(A, b);
+		timeJacobi = double(clock() - start) / CLOCKS_PER_SEC;
+		std::cout << "Jacobi time: " << timeJacobi << ", iterations: " << itersJ << std::endl;
+
+		start = clock();
+		itersGS = GaussSeidel(A, b);
+		timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
+		std::cout << "Gauss-Seidel time: " << timeSeidel << ", iterations: " << itersGS << std::endl;
+
+	}
 
 	system("pause");
 	return 0;

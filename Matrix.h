@@ -7,7 +7,7 @@ class Matrix
 {
 protected:
 	int rows, cols;
-	double** arr;
+	double** arr=nullptr;
 
 public:
 
@@ -15,6 +15,7 @@ public:
 	Matrix(int rows, int cols);
 	~Matrix();
 	Matrix(const Matrix& m);
+	Matrix(Matrix&& m);
 	Matrix operator=(const Matrix& m);
 	Matrix operator=(Matrix&& m);
 	Matrix operator+(const Matrix& m) const;

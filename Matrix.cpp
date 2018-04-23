@@ -10,8 +10,9 @@ Matrix::Matrix()
 }
 
 Matrix::Matrix(int rows, int cols)
-	:rows(rows), cols(cols)
 {
+	this->rows = rows;
+	this->cols = cols;
 	arr = (double**)calloc(rows, sizeof(double*));
 	for (int i = 0; i < rows; i++)
 	{
@@ -44,6 +45,13 @@ Matrix::Matrix(const Matrix& m)
 	}
 }
 
+Matrix::Matrix(Matrix && m)
+{
+	std::swap(rows, m.rows);
+	std::swap(cols, m.cols);
+	std::swap(arr, m.arr);
+}
+
 
 
 Matrix Matrix:: operator=(const Matrix& m)
@@ -62,8 +70,8 @@ Matrix Matrix:: operator=(const Matrix& m)
 
 Matrix Matrix:: operator=(Matrix&& m)
 {
-	rows = m.rows;
-	cols = m.cols;
+	std::swap(rows, m.rows);
+	std::swap(cols, m.cols);
 	std::swap(arr, m.arr);
 	return *this;
 }
