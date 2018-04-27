@@ -6,11 +6,7 @@ Vector::Vector(int elements)
 	this->Matrix::Matrix(elements, 1);
 }
 
-double& Vector::operator[] (int element)
-{
-	assert(element < rows);
-	return arr[element][0];
-}
+
 
 double& Vector::operator()(int element)
 {

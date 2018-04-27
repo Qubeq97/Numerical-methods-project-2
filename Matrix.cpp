@@ -13,10 +13,14 @@ Matrix::Matrix(int rows, int cols)
 {
 	this->rows = rows;
 	this->cols = cols;
-	arr = (double**)calloc(rows, sizeof(double*));
+	// arr = (double**)calloc(rows, sizeof(double*));
+	arr = new double*[rows];
 	for (int i = 0; i < rows; i++)
 	{
-		arr[i] = (double*)calloc(cols, sizeof(double));
+		//arr[i] = (double*)calloc(cols, sizeof(double));
+		arr[i] = new double[cols];
+		for (int j = 0; j < cols; j++)
+			arr[i][j] = 0;
 	}
 }
 
@@ -26,8 +30,10 @@ Matrix::~Matrix()
 	if (arr != nullptr)
 	{
 		for (int i = 0; i < rows; i++)
-			free(arr[i]);
-		free(arr);
+			delete[] arr[i];
+			//free(arr[i]);
+		//free(arr);
+		delete[] arr;
 	}
 	arr = nullptr;
 }
@@ -36,10 +42,12 @@ Matrix::Matrix(const Matrix& m)
 {
 	rows = m.rows;
 	cols = m.cols;
-	arr = (double**)calloc(rows, sizeof(double*));
+	// arr = (double**)calloc(rows, sizeof(double*));
+	arr = new double*[rows];
 	for (int i = 0; i < rows; i++)
 	{
-		arr[i] = (double*)calloc(cols, sizeof(double));
+		// arr[i] = (double*)calloc(cols, sizeof(double));
+		arr[i] = new double[cols];
 		for (int j = 0; j < cols; j++)
 			arr[i][j] = m.arr[i][j];
 	}
@@ -58,10 +66,12 @@ Matrix Matrix:: operator=(const Matrix& m)
 {
 	rows = m.rows;
 	cols = m.cols;
-	arr = (double**)calloc(rows, sizeof(double*));
+	// arr = (double**)calloc(rows, sizeof(double*));
+	arr = new double*[rows];
 	for (int i = 0; i < rows; i++)
 	{
-		arr[i] = (double*)calloc(cols, sizeof(double));
+		// arr[i] = (double*)calloc(cols, sizeof(double));
+		arr[i] = new double[cols];
 		for (int j = 0; j < cols; j++)
 			arr[i][j] = m.arr[i][j];
 	}
@@ -147,17 +157,6 @@ Matrix Matrix::transposed()
 	return result;
 }
 
-Matrix Matrix::ones(int rows, int cols)
-{
-	Matrix result;
-	result.arr = arr = (double**)calloc(rows, sizeof(double*));
-	for (int i = 0; i < rows; i++)
-	{
-		arr[i] = (double*)calloc(cols, sizeof(double));
-		arr[i][i] = 1;
-	}
-	return result;
-}
 
 double& Matrix::operator()(int row, int col)
 {
@@ -170,14 +169,6 @@ double Matrix::operator()(int row, int col) const
 	assert(row < rows && col < cols);
 	return arr[row][col];
 }
-
-
-
-double* Matrix::operator[] (int row)
-{
-	return arr[row];
-}
-
 
 
 

@@ -25,14 +25,11 @@ public:
 	bool operator == (const Matrix& m) const;
 	Matrix diagonal() const;
 	Matrix transposed();
-	Matrix ones(int rows, int cols);
 	double& operator() (int, int);
 	double operator() (int, int) const;
-	double* operator[] (int row);
 	int getRows() const;
 	int getCols() const;
 };
-
 
 
 

@@ -8,7 +8,6 @@ class Vector :
 {
 public:
 	Vector(int);
-	double& operator[] (int);
 	double& operator()(int);
 	double operator() (int) const;
 	int getLength() const;
