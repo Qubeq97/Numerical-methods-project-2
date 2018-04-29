@@ -109,7 +109,7 @@ double LUFactor(const Matrix& A, const Matrix& b)
 	return norm(A*x - b);
 }
 
-double Jacobi(const Matrix& A, const Vector& b)
+double Jacobi(const Matrix& A, const Vector& b, bool show = false)
 {
 	assert(A.getRows() == A.getCols() && A.getRows() == b.getRows());
 
@@ -118,7 +118,7 @@ double Jacobi(const Matrix& A, const Vector& b)
 
 	Vector x(b.getLength());
 	for (int i = 0; i < x.getLength(); i++)
-		x(i) = 1;
+		x(i) = 1 / b.getLength();
 
 
 	double resnorm;
@@ -128,13 +128,15 @@ double Jacobi(const Matrix& A, const Vector& b)
 		x = forwardSubst(-D, sumLU*x) + forwardSubst(D, b);
 		resnorm = norm(A*x - b);
 		iters++;
-	} while (resnorm > pow(10, -9));
+		if (show)
+			std::cout << resnorm << std::endl;
+	} while (resnorm > pow(10, -9) && iters < 1000);
 
 
 	return resnorm;
 }
 
-double GaussSeidel(const Matrix& A, const Vector& b)
+double GaussSeidel(const Matrix& A, const Vector& b, bool show = false)
 {
 	Matrix U = A;
 	int rows = A.getRows(), cols = A.getCols();
@@ -150,7 +152,7 @@ double GaussSeidel(const Matrix& A, const Vector& b)
 
 	Vector x(b.getLength());
 	for (int i = 0; i < x.getLength(); i++)
-		x(i) = 1;
+		x(i) = 1 / b.getLength();
 
 
 	iters = 0;
@@ -160,7 +162,9 @@ double GaussSeidel(const Matrix& A, const Vector& b)
 		x = backwardSubst(-sumDL, U*x) + backwardSubst(sumDL, b);
 		resnorm = norm(A*x - b);
 		iters++;
-	} while (resnorm > pow(10, -9));
+		if (show)
+			std::cout << resnorm << std::endl;
+	} while (resnorm > pow(10, -9) && iters < 1000);
 
 	return resnorm;
 }
@@ -175,56 +179,74 @@ int main()
 
 	clock_t start;
 
-	std::cout << "Test for 961 elements" << std::endl;
+	std::ofstream output_a("results_A.txt");
 
-	start = clock();
-	resnorm = Jacobi(A, b);
-	double timeJacobi = double(clock() - start) / CLOCKS_PER_SEC;
-	std::cout << "Jacobi time: " << timeJacobi << ", iterations: " << iters << ", residuum norm: "<<resnorm<<std::endl;
-
-	start = clock();
-	resnorm = GaussSeidel(A, b);
-	double timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
-	std::cout << "Gauss-Seidel time: " << timeSeidel << ", iterations: " << iters << ", residuum norm: " << resnorm << std::endl;
-
-
-	// case C
-	A = ourMatrix(961, 3);
-
-	/*itersJ = Jacobi(A, b);
-	itersGS = GaussSeidel(A, b);
-	std::cout << "Jacobi iters: " << itersJ << std::endl;
-	std::cout << "Gauss-Seidel iters: " << itersGS << std::endl;*/
-	// Upper ones diverge.
-
-	std::cout << "Test for 961 elements - case C" << std::endl;
-	start = clock();
-	resnorm = LUFactor(A, b);
-	double timeLU = double(clock() - start) / CLOCKS_PER_SEC;
-	std::cout << "LU time: " << timeLU << ", residuum norm: " << resnorm << std::endl;
-
-
-	// In that case, iterative methods DO NOT converge and would iterate infinitely
-	// Commented because it would get the program stuck.
-
-
-	int tab[] = { 100,500,1000,2000,3000,6000 };
-
-	std::ofstream output("results.txt");
-
-	if (!output.is_open())
+	if (!output_a.is_open())
 	{
 		std::cerr << "Error opening results file!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
-	output << "N;Jacobi;GS;LU" << std::endl;
+	std::cout << "Test for 961 elements - case A" << std::endl;
+	output_a << "Test for 961 elements - case A" << std::endl;
+
+	start = clock();
+	resnorm = Jacobi(A, b);
+	double timeJacobi = double(clock() - start) / CLOCKS_PER_SEC;
+	output_a << "Jacobi time: " << timeJacobi << ", iterations: " << iters << ", residuum norm: " << resnorm << std::endl;
+
+	start = clock();
+	resnorm = GaussSeidel(A, b);
+	double timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
+	output_a << "Gauss-Seidel time: " << timeSeidel << ", iterations: " << iters << ", residuum norm: " << resnorm << std::endl;
+
+	
+	// case C
+	std::cout << "Test for 961 elements - case C" << std::endl;
+	output_a << "Test for 961 elements - case C" << std::endl;
+
+
+	A = ourMatrix(961, 3);
+
+	std::cout << "Jacobi:" << std::endl;
+	start = clock();
+	resnorm = Jacobi(A, b, true);
+	timeJacobi = double(clock() - start) / CLOCKS_PER_SEC;
+	output_a << "Jacobi time: " << timeJacobi << ", iterations: " << iters << ", residuum norm: " << resnorm << std::endl;
+
+	std::cout << "Gauss-Seidel:" << std::endl;
+	start = clock();
+	resnorm = GaussSeidel(A, b,true);
+	timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
+	output_a << "Gauss-Seidel time: " << timeSeidel << ", iterations: " << iters << ", residuum norm: " << resnorm << std::endl;
+
+
+	start = clock();
+	resnorm = LUFactor(A, b);
+	double timeLU = double(clock() - start) / CLOCKS_PER_SEC;
+	output_a<< "LU time: " << timeLU << ", residuum norm: " << resnorm << std::endl;
+
+	output_a.close();
+
+
+
+	int tab[] = { 100,500,1000,2000,3000,6000 };
+
+	std::ofstream output_b("results_B.txt");
+
+	if (!output_b.is_open())
+	{
+		std::cerr << "Error opening results file!" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	output_b << "N;Jacobi;GS;LU" << std::endl;
 
 	for (int N : tab)
 	{
 		std::cout << "Calculating for N = " << N << std::endl;
 
-		output << N << ';';
+		output_b << N << ';';
 
 		A = ourMatrix(N, A1);
 		b = ourVector(N, F);
@@ -233,21 +255,21 @@ int main()
 		start = clock();
 		resnorm = Jacobi(A, b);
 		timeJacobi = double(clock() - start) / CLOCKS_PER_SEC;
-		output << timeJacobi << ';';
+		output_b << timeJacobi << ';';
 
 		start = clock();
 		resnorm = GaussSeidel(A, b);
 		timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
-		output << timeSeidel << ';';
+		output_b << timeSeidel << ';';
 
 		start = clock();
 		resnorm = LUFactor(A, b);
-		double timeLU = double(clock() - start) / CLOCKS_PER_SEC;
-		output << timeLU<< std::endl;
+		timeLU = double(clock() - start) / CLOCKS_PER_SEC;
+		output_b << timeLU << std::endl;
 
 	}
 
-	output.close();
+	output_b.close();
 
 	std::cout << "Results calculated successfully." << std::endl;
 	system("pause");

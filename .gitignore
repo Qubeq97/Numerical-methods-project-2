@@ -240,3 +240,6 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/Sprawozdanie.docx
+/results_B.txt
+/results_A.txt
