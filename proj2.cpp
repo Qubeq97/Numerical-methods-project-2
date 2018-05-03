@@ -10,7 +10,7 @@
 
 int iters;
 
-// Function making a matrix complaint with project requirements.
+// Function making a matrix compliant with project requirements.
 Matrix ourMatrix(int N, double a1)
 {
 	Matrix result(N, N);
@@ -39,7 +39,7 @@ Vector ourVector(int N, int f)
 {
 	Vector result(N);
 	for (int i = 0; i < N; i++)
-		result(i) = sin(i*(f + 1));
+		result(i) = sin((i+1)*(f + 1));
 	return result;
 }
 
@@ -118,7 +118,7 @@ double Jacobi(const Matrix& A, const Vector& b, bool show = false)
 
 	Vector x(b.getLength());
 	for (int i = 0; i < x.getLength(); i++)
-		x(i) = 1 / b.getLength();
+		x(i) = 1.0 / (double)b.getLength();
 
 
 	double resnorm;
@@ -152,7 +152,7 @@ double GaussSeidel(const Matrix& A, const Vector& b, bool show = false)
 
 	Vector x(b.getLength());
 	for (int i = 0; i < x.getLength(); i++)
-		x(i) = 1 / b.getLength();
+		x(i) = 1.0 / (double)b.getLength();
 
 
 	iters = 0;
@@ -240,7 +240,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	output_b << "N;Jacobi;GS;LU" << std::endl;
+	output_b << "N;Jacobi;Gauss-Seidel;LU" << std::endl;
 
 	for (int N : tab)
 	{
@@ -254,16 +254,19 @@ int main()
 
 		start = clock();
 		resnorm = Jacobi(A, b);
+		std::cout << "Jacobi norm: " << resnorm << std::endl;
 		timeJacobi = double(clock() - start) / CLOCKS_PER_SEC;
 		output_b << timeJacobi << ';';
 
 		start = clock();
 		resnorm = GaussSeidel(A, b);
+		std::cout << "GS norm: " << resnorm << std::endl;
 		timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
 		output_b << timeSeidel << ';';
 
 		start = clock();
 		resnorm = LUFactor(A, b);
+		std::cout << "LU norm: " << resnorm << std::endl;
 		timeLU = double(clock() - start) / CLOCKS_PER_SEC;
 		output_b << timeLU << std::endl;
 
