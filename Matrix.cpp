@@ -13,11 +13,9 @@ Matrix::Matrix(int rows, int cols)
 {
 	this->rows = rows;
 	this->cols = cols;
-	// arr = (double**)calloc(rows, sizeof(double*));
 	arr = new double*[rows];
 	for (int i = 0; i < rows; i++)
 	{
-		//arr[i] = (double*)calloc(cols, sizeof(double));
 		arr[i] = new double[cols];
 		for (int j = 0; j < cols; j++)
 			arr[i][j] = 0;
@@ -31,8 +29,6 @@ Matrix::~Matrix()
 	{
 		for (int i = 0; i < rows; i++)
 			delete[] arr[i];
-			//free(arr[i]);
-		//free(arr);
 		delete[] arr;
 	}
 	arr = nullptr;
@@ -42,11 +38,9 @@ Matrix::Matrix(const Matrix& m)
 {
 	rows = m.rows;
 	cols = m.cols;
-	// arr = (double**)calloc(rows, sizeof(double*));
 	arr = new double*[rows];
 	for (int i = 0; i < rows; i++)
 	{
-		// arr[i] = (double*)calloc(cols, sizeof(double));
 		arr[i] = new double[cols];
 		for (int j = 0; j < cols; j++)
 			arr[i][j] = m.arr[i][j];
@@ -66,11 +60,9 @@ Matrix Matrix:: operator=(const Matrix& m)
 {
 	rows = m.rows;
 	cols = m.cols;
-	// arr = (double**)calloc(rows, sizeof(double*));
 	arr = new double*[rows];
 	for (int i = 0; i < rows; i++)
 	{
-		// arr[i] = (double*)calloc(cols, sizeof(double));
 		arr[i] = new double[cols];
 		for (int j = 0; j < cols; j++)
 			arr[i][j] = m.arr[i][j];
@@ -148,14 +140,6 @@ bool Matrix::operator == (const Matrix& m) const
 	return true;
 }
 
-Matrix Matrix::transposed()
-{
-	Matrix result(cols, rows);
-	for (int i = 0; i < cols; i++)
-		for (int j = 0; j < rows; j++)
-			result.arr[i][j] = this->arr[j][i];
-	return result;
-}
 
 
 double& Matrix::operator()(int row, int col)
@@ -179,14 +163,4 @@ int Matrix::getRows() const
 int Matrix::getCols() const
 {
 	return cols;
-}
-
-
-Matrix Matrix::diagonal() const
-{
-	assert(cols == rows);
-	Matrix result = Matrix(cols, rows);
-	for (int i = 0; i < rows; i++)
-		result.arr[i][i] = arr[i][i];
-	return result;
 }

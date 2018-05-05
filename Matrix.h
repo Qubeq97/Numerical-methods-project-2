@@ -23,17 +23,10 @@ public:
 	Matrix operator*(const Matrix& m) const;
 	Matrix operator-() const;
 	bool operator == (const Matrix& m) const;
-	Matrix diagonal() const;
-	Matrix transposed();
 	double& operator() (int, int);
 	double operator() (int, int) const;
 	int getRows() const;
 	int getCols() const;
 };
-
-
-
-
-
 
 #endif

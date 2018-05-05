@@ -7,10 +7,12 @@
 
 #define A1 (5+7)
 #define F 5
+#define SIZE 961
 
 int iters;
 
-// Function making a matrix compliant with project requirements.
+
+// Function returning a matrix compliant with project requirements.
 Matrix ourMatrix(int N, double a1)
 {
 	Matrix result(N, N);
@@ -34,12 +36,12 @@ Matrix ourMatrix(int N, double a1)
 	return result;
 }
 
-// A vector compliant to project requirements.
+// A vector compliant with project requirements.
 Vector ourVector(int N, int f)
 {
 	Vector result(N);
 	for (int i = 0; i < N; i++)
-		result(i) = sin((i+1)*(f + 1));
+		result(i) = sin((i + 1)*(f + 1));
 	return result;
 }
 
@@ -91,7 +93,6 @@ Vector backwardSubst(const Matrix& U, const Vector& b)
 
 double LUFactor(const Matrix& A, const Matrix& b)
 {
-	assert(A.getRows() == A.getCols() && A.getRows() == b.getRows());
 	int m = A.getRows();
 	Matrix L(m, m);
 	for (int i = 0; i < m; i++)
@@ -111,21 +112,30 @@ double LUFactor(const Matrix& A, const Matrix& b)
 
 double Jacobi(const Matrix& A, const Vector& b, bool show = false)
 {
-	assert(A.getRows() == A.getCols() && A.getRows() == b.getRows());
-
-	Matrix D = A.diagonal();
-	Matrix sumLU = A - D;
 
 	Vector x(b.getLength());
 	for (int i = 0; i < x.getLength(); i++)
 		x(i) = 1.0 / (double)b.getLength();
-
+	Vector next = x;
 
 	double resnorm;
 	iters = 0;
 	do
 	{
-		x = forwardSubst(-D, sumLU*x) + forwardSubst(D, b);
+		for (int i = 0; i < x.getLength(); i++)
+		{
+			double result = b(i);
+			double sum = 0;
+			for (int j = 0; j <= i - 1; j++)
+				sum += A(i, j)*x(j);
+			result -= sum;
+			sum = 0;
+			for (int j = i + 1; j < x.getLength(); j++)
+				sum += A(i, j)*x(j);
+			result -= sum;
+			next(i) = result / A(i, i);
+		}
+		x = next;
 		resnorm = norm(A*x - b);
 		iters++;
 		if (show)
@@ -138,28 +148,30 @@ double Jacobi(const Matrix& A, const Vector& b, bool show = false)
 
 double GaussSeidel(const Matrix& A, const Vector& b, bool show = false)
 {
-	Matrix U = A;
-	int rows = A.getRows(), cols = A.getCols();
-	for (int i = 0; i < rows; i++)
-	{
-		for (int j = 0; j <= i; j++)
-		{
-			U(rows - i - 1, cols - j - 1) = 0;
-		}
-	}
-
-	Matrix sumDL = A - U;
 
 	Vector x(b.getLength());
 	for (int i = 0; i < x.getLength(); i++)
 		x(i) = 1.0 / (double)b.getLength();
-
+	Vector next = x;
 
 	iters = 0;
 	double resnorm;
 	do
 	{
-		x = backwardSubst(-sumDL, U*x) + backwardSubst(sumDL, b);
+		for (int i = 0; i < x.getLength(); i++)
+		{
+			double result = b(i);
+			double sum = 0;
+			for (int j = 0; j <= i - 1; j++)
+				sum += A(i, j)*next(j);
+			result -= sum;
+			sum = 0;
+			for (int j = i + 1; j < x.getLength(); j++)
+				sum += A(i, j)*x(j);
+			result -= sum;
+			next(i) = result / A(i, i);
+		}
+		x = next;
 		resnorm = norm(A*x - b);
 		iters++;
 		if (show)
@@ -174,8 +186,9 @@ int main()
 {
 	double resnorm;
 
-	Matrix A = ourMatrix(961, A1);
-	Vector b = ourVector(961, F);
+	// case A
+	Matrix A = ourMatrix(SIZE, A1);
+	Vector b = ourVector(SIZE, F);
 
 	clock_t start;
 
@@ -200,13 +213,13 @@ int main()
 	double timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
 	output_a << "Gauss-Seidel time: " << timeSeidel << ", iterations: " << iters << ", residuum norm: " << resnorm << std::endl;
 
-	
+
 	// case C
 	std::cout << "Test for 961 elements - case C" << std::endl;
 	output_a << "Test for 961 elements - case C" << std::endl;
 
 
-	A = ourMatrix(961, 3);
+	A = ourMatrix(SIZE, 3);
 
 	std::cout << "Jacobi:" << std::endl;
 	start = clock();
@@ -216,20 +229,19 @@ int main()
 
 	std::cout << "Gauss-Seidel:" << std::endl;
 	start = clock();
-	resnorm = GaussSeidel(A, b,true);
+	resnorm = GaussSeidel(A, b, true);
 	timeSeidel = double(clock() - start) / CLOCKS_PER_SEC;
 	output_a << "Gauss-Seidel time: " << timeSeidel << ", iterations: " << iters << ", residuum norm: " << resnorm << std::endl;
-
 
 	start = clock();
 	resnorm = LUFactor(A, b);
 	double timeLU = double(clock() - start) / CLOCKS_PER_SEC;
-	output_a<< "LU time: " << timeLU << ", residuum norm: " << resnorm << std::endl;
+	output_a << "LU time: " << timeLU << ", residuum norm: " << resnorm << std::endl;
 
 	output_a.close();
 
 
-
+	// case E
 	int tab[] = { 100,500,1000,2000,3000,6000 };
 
 	std::ofstream output_b("results_B.txt");
